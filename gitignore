@@ -1,3 +1,5 @@
 node_modules/
+client/node_modules/
+server/players.json
 .env
 .DS_Store

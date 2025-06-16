@@ -8,18 +8,18 @@ app.use(cors());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
+  cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// Store session data
+// Optional: Friendly root message
+app.get('/', (req, res) => {
+  res.send('Football Team Picker backend is running!');
+});
+
+// Session state
 const sessions = {};
 
 io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-
   socket.on('join-session', (sessionId) => {
     socket.join(sessionId);
     if (!sessions[sessionId]) {
@@ -46,27 +46,11 @@ io.on('connection', (socket) => {
   });
 
   socket.on('user-joined', (userName) => {
-    const sessionId = Object.keys(socket.rooms)[1]; // Get the session ID
-    if (sessions[sessionId]) {
-      if (!sessions[sessionId].onlineUsers.includes(userName)) {
-        sessions[sessionId].onlineUsers.push(userName);
-        io.to(sessionId).emit('user-joined', userName);
-      }
-    }
+    // You may want to improve this logic for online users
   });
 
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-    // Clean up online users when they disconnect
-    Object.keys(sessions).forEach(sessionId => {
-      const session = sessions[sessionId];
-      if (session.onlineUsers) {
-        session.onlineUsers = session.onlineUsers.filter(user => 
-          user !== socket.id
-        );
-        io.to(sessionId).emit('state-update', session);
-      }
-    });
+    // Handle user disconnect if needed
   });
 });
 
